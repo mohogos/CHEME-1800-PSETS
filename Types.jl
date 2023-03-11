@@ -1,15 +1,17 @@
-abstract type AbstractEncryptionKey end
+abstract type AbstractChemicalCompoundModel end
 
 """
-    DNAEncryptionKey <: AbstractEncryptionKey
+    MyChemicalCompoundModel
 
-Custom mutable type that holds a DNA encryption key implemented as the dictionary `encryptionkey`
+Holds data for the chemical compound records
 """
-mutable struct DNAEncryptionKey <: AbstractEncryptionKey
+mutable struct MyChemicalCompoundModel <: AbstractChemicalCompoundModel
 
     # data -
-    encryptionkey::Dict{Char, String}
+    name::String
+    compund::String
+    composition::Dict{Char,Int}
 
-    # constructor 
-    DNAEncryptionKey() = new()
+    # constuctor
+    MyChemicalCompoundModel() = new()
 end
