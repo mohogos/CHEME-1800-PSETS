@@ -1,82 +1,32 @@
-## Problem Set 3: Iterative Solution of a Species Concentration Balance
+## Problem Set 4: Principle component analysis (PCA) of synthetic patient data
+Principal Component Analysis (PCA) is a statistical technique that reduces the dimensionality of a dataset while retaining as much of its variation as possible. PCA transforms the original dataset into a new set of uncorrelated variables called principal components, ranked by importance. 
 
-Set up a system of linear algebraic equations whose solution describes concentration as a function of time for a compound $A$ that undergoes first-order decay in a constant volume, isothermal well-mixed batch reactor (no flow in or out). The concentration balance for compound $A$ is given by:
+* Principal components are the directions in which the data varies the most. Principle components are the eigenvectors of the 
+[covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix) of the data.  The principal components are obtained from columns of the matrix $\mathbf{U}$, computed using [Singular Value Decomposition (SVD)](https://en.wikipedia.org/wiki/Singular_value_decomposition). The variance that each component explains is obtained from the singular values in $\mathbf{\Sigma}$.
 
-$$
-\frac{dC_{A}}{dt} = -\kappa{C_{A}}
-$$
+### Data
+The `Synthetic-Numerical-CoV-10K-Fibrinolysis-NoMLabels.csv` dataset holds clinical measurements for basal (V1), first-trimester (V2) and third-trimester (V3) synthetic patients (1000 each, for a total of 30k patient records).
 
-where $\kappa$ denotes the first-order rate constant governing the rate of decay (units: 1/time), where the initial condition is given by $C_{A,0}$. Discretize the concentration balance using a [forward finite difference](https://en.wikipedia.org/wiki/Finite_difference) approximation of the time derivative:
-
-$$
-C_{A,j+1} = C_{A,j} - h\kappa{C_{A,j}}\qquad{j=0,2,N}
-$$
-
-where $h$ denotes the time step-size, $C_{A,\star}$ denotes the concentration of $A$ at time-step $\star$ and $N$ denotes the _number_ of time steps. Starting with $j=0$, construct a $N\times{N}$ matrix where each row is a time-step and each column is a concentration value:
-
-$$
-\begin{pmatrix}
-1 & 0 & \dots & 0 \\
-(\kappa{h} - 1) & 1 & \dots & 0 \\
-\vdots & \vdots & \vdots & \vdots \\
-0 & \dots & (\kappa{h} - 1) & 1
-\end{pmatrix}
-\begin{pmatrix}
-C_{A,1} \\
-C_{A,2} \\
-\vdots \\
-C_{A,N}
-\end{pmatrix} = 
-\begin{pmatrix}
-C_{A,0}\left(1-h\kappa\right) \\
-0 \\
-\vdots \\
-0 
-\end{pmatrix}
-$$
-
-Thus, the problem of estimating the concentration of compound $A$ as a function of time reduces to the solution of a system of linear algebraic equations of the form:
-
-$$
-\mathbf{A}\mathbf{x} = \mathbf{b}
-$$
+### Prerequisites
+* Problem set 4 requires that the [CSV.jl](https://github.com/JuliaData/CSV.jl) and [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) packages be installed using the [Julia package manager included in the standard library](https://docs.julialang.org/en/v1/stdlib/Pkg/).
 
 ### Tasks
-1. Implement the functions `_build_right_handside_vector` and `_build_system_matrix` in `Factory.jl`. 
-    1. `_build_right_handside_vector` is an internal function (not meant to be called by the user directly) that builds the right-hand side vector $\mathbf{b}\in\mathbb{R}^{T\times{1}}$ given system parameters.
-    1. `_build_system_matrix` is an internal function (not meant to be called by the user directly) that builds the system matrix $\mathbf{A}\in\mathbb{R}^{T\times{T}}$ given the system parameters.
-1. Modify the `solve` method in `Solvers.jl` to be compatible with the `MyChemicalDecayModel` type.
-1. Solve the system of equations using `Jacobi` and `Gauss-Seidel` iteration for the concentration of $A$ at the discrete time-points $C_{A,1},\dots, C_{A, N}$ for the parameters:
-    1. Case 1: Let $C_{A,0} = 10~\text{mmol/L}$, $\kappa = 1.0~\text{hr}^{-1}$, $h = 0.1~\text{hr}$ and the final time $T_{f} = 20.0~\text{hr}$.
-    1. Case 2: Let $C_{A,0} = 10~\text{mmol/L}$, $\kappa = 10.0~\text{hr}^{-1}$, $h = 0.1~\text{hr}$ and the final time $T_{f} = 20.0~\text{hr}$.
-    1. Case 3: Let $C_{A,0} = 10~\text{mmol/L}$, $\kappa = 100.0~\text{hr}^{-1}$, $h = 0.1~\text{hr}$ and the final time $T_{f} = 20.0~\text{hr}$.
-1. Make a results [markdown table](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) in your `README.md` file. Each column of the table will be a case, while the rows will be:    
-    1. Whether $\det(\mathbf{A})\neq{0}$
-    1. whether the system matrix $\mathbf{A}$ is diagonally dominant 
-    1. whether the `Jacobi` solver found a solution
-    1. whether the `Gauss-Seidel` found a solution
-    1. The error between the solution found by the `Jacobi` solver and by calculating $\mathbf{A}^{-1}$ using the `inv` command. The error can be calculated using the [norm function](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.norm).
-    1. The error between the solution found by the `Gauss-Seidel` solver and by calculating $\mathbf{A}^{-1}$ using the `inv` command. The error can be calculated using the [norm function](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.norm).
-
-### Potentially useful stuff
-The number of time steps that we need to consider is:
-
-$$
-N = \frac{T_{f} - T_{\circ}}{h}
-$$
-
-where $h$ denotes the step size, $T_{f}$ denotes the final time, and $T_{\circ}$ denotes the initial time (in this case $T_{\circ} = 0$).
+1. Start the Julia in the `PS4` folder with the `--project=.` argument
+1. Install required packages using the [Julia package manager](https://docs.julialang.org/en/v1/stdlib/Pkg/).
+1. __Duration__ (05 minutes): Break up into teams and familiarize yourself with the files and functions in `PS4`.
+1. __Duration__ (10 minutes): Implement the `_mean` function in the `Compute.jl` file. The `_mean` function computes the [arithmetic mean](https://en.wikipedia.org/wiki/Mean) $\mu$ of a data vector.
+1. __Duration__ (10 minutes): Implement the `_std` function in the `Compute.jl` file. The `_std` function computes the [unbiased sample standard deviation](https://en.wikipedia.org/wiki/Unbiased_estimation_of_standard_deviation) $\sigma$ of a data vector.
+1. __Duration__ (25 minutes): Compute the first two principle components using [Singular Value Decomposition (SVD)](https://en.wikipedia.org/wiki/Singular_value_decomposition) of the transpose of the standardized data array in the `Submit.jl` file.
 
 ### Assessment
 * The teaching team will execute the `Submit.jl` script with your program functions. 
-* The teaching team will verify the entries in your `README.md` results table. 
 * The teaching team will evaluate style components: variable and function names should be informative, and functions should have informative docstrings. 
 * The teaching team will evaluate whether the submission guidelines were followed.
 
 ### Rules, deadlines, and submission guidelines
-* Problem Set 3 is due on __Saturday, March 18, 2023__ by __11:59 PM__ ITH time. 
+* Problem Set 4 is due on __Saturday, March 25, 2023__ by __11:59 AM__ ITH time. 
 * You may use your course materials and any literature resources (as well as the internet) to formulate your solutions.
-* You may work in teams. All codes must be stored in a GitHub repository, and the link to that repository (and team information) must be entered into the [teaching team spreadsheet on box](https://cornell.box.com/s/hzioytetv3eb1trs4uoymo5kynbj13so) by the deadline. 
+* You may work in teams. All codes must be stored in a GitHub repository, and the link to that repository (and team information) must be entered into the [teaching team spreadsheet on box](https://cornell.box.com/s/md7wi4igt74d19ffc3gz11xx5kd0gwih) by the deadline. 
 
 #### Notes on the GitHub repository
 * Each student on the problem set team must be a collaborator on the problem set GitHub repository. 

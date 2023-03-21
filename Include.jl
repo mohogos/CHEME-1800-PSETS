@@ -1,13 +1,17 @@
 # setup paths -
-const _ROOT = pwd()
+const _ROOT = pwd();
 const _PATH_TO_SRC = joinpath(_ROOT, "src")
+const _PATH_TO_DATA = joinpath(_ROOT, "data");
+const _PATH_TO_FIGS = joinpath(_ROOT, "figs");
 
-# load external packages -
+# load packages we need
 using LinearAlgebra
-using IterativeSolvers
+using DelimitedFiles
+using Statistics
+using CSV
+using DataFrames
 
 # load my codes -
-# TODO: Fill in the include statements with your files
-include(joinpath(_PATH_TO_SRC, "Factory.jl"))
-include(joinpath(_PATH_TO_SRC, "Solvers.jl"))
-include(joinpath(_PATH_TO_SRC, "Types.jl"))
+include(joinpath(_PATH_TO_SRC, "Compute.jl"))
+include(joinpath(_PATH_TO_SRC, "Files.jl"))
+include(joinpath(_PATH_TO_SRC, "Modes.jl"))
